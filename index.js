@@ -18,6 +18,12 @@ app.use(
 
 app.use(express.json());
 
+const keyMap = {
+  "tenant_app_kibet": process.env.PAYSTACK_SECRET_KIBET,
+  "tenant_app_festo": process.env.PAYSTACK_SECRET_FESTO,
+  "tenant_app_kevo": process.env.PAYSTACK_SECRET_KEVO
+};
+
 // Enhanced status mapping with user-friendly messages
 const STATUS_MESSAGES = {
   abandoned: {
@@ -87,12 +93,12 @@ const STATUS_MESSAGES = {
 // Enhanced payment initialization - NO AUTH
 app.post("/api/initialize", async (req, res) => {
   const {
+    appId,
     email,
     amount,
     phone,
     userId,
     activation_type = "account_activation",
-    paystack_secret_key
   } = req.body;
 
   console.log("=== PAYMENT INITIALIZATION REQUEST ===");
@@ -170,7 +176,7 @@ app.post("/api/initialize", async (req, res) => {
       paystackPayload,
       {
         headers: {
-          Authorization: `Bearer ${paystack_secret_key || process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${keyMap[appId] || process.env.PAYSTACK_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
         timeout: 30000,
@@ -270,7 +276,8 @@ app.post("/api/initialize", async (req, res) => {
 
 // Enhanced transaction verification - NO AUTH
 app.get("/api/verify/:reference", async (req, res) => {
-  const { reference, paystack_secret_key } = req.params;
+  const { reference } = req.params;
+  const { appId } = req.query;
 
   console.log("=== TRANSACTION VERIFICATION ===");
   console.log("Reference:", reference);
@@ -287,7 +294,7 @@ app.get("/api/verify/:reference", async (req, res) => {
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
         headers: {
-          Authorization: `Bearer ${paystack_secret_key || process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${keyMap[appId] || process.env.PAYSTACK_SECRET_KEY}`,
         },
         timeout: 15000,
       }
@@ -353,7 +360,8 @@ app.get("/api/verify/:reference", async (req, res) => {
 
 // Enhanced status polling endpoint - NO AUTH
 app.get("/api/status/:reference", async (req, res) => {
-  const { reference, paystack_secret_key } = req.params;
+  const { reference } = req.params;
+  const { appId } = req.query;
 
   if (!reference) {
     return res.status(400).json({
@@ -367,7 +375,7 @@ app.get("/api/status/:reference", async (req, res) => {
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
         headers: {
-          Authorization: `Bearer ${paystack_secret_key || process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${keyMap[appId] || process.env.PAYSTACK_SECRET_KEY}`,
         },
         timeout: 10000,
       }
@@ -409,7 +417,8 @@ app.get("/api/status/:reference", async (req, res) => {
 
 // Submit OTP endpoint - NO AUTH
 app.post("/api/submit-otp", async (req, res) => {
-  const { otp, reference, paystack_secret_key } = req.body;
+  const { otp, reference } = req.body;
+  const { appId } = req.query;
 
   console.log("=== OTP SUBMISSION ===");
   console.log("OTP for reference:", reference);
@@ -430,7 +439,7 @@ app.post("/api/submit-otp", async (req, res) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${paystack_secret_key || process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${keyMap[appId] || process.env.PAYSTACK_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
         timeout: 15000,
