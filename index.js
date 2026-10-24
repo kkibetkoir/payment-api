@@ -21,7 +21,8 @@ app.use(express.json());
 const keyMap = {
   "tenant_app_kibet": process.env.PAYSTACK_SECRET_KIBET,
   "tenant_app_festo": process.env.PAYSTACK_SECRET_FESTO,
-  "tenant_app_kevo": process.env.PAYSTACK_SECRET_KEVO
+  "tenant_app_kevo": process.env.PAYSTACK_SECRET_KEVO,
+  "tenant_app_jafe": process.env.PAYSTACK_SECRET_JAFE
 };
 
 // Enhanced status mapping with user-friendly messages
